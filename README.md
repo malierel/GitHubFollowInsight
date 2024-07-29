@@ -1,4 +1,3 @@
-Here's a draft for a `README.md` file for the `GitHubFollowInsight` project:
 
 ---
 
@@ -66,4 +65,3 @@ This project utilizes the GitHub API to interact with GitHub data.
 
 ---
 
-Feel free to modify or expand upon this template to better suit the specific details and style you want for your project.
