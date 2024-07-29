@@ -31,18 +31,35 @@ def find_non_followers(username, token):
     non_followers = following - followers
     return list(non_followers)
 
+def unfollow_user(username, token, user_to_unfollow):
+    url = f"https://api.github.com/user/following/{user_to_unfollow}"
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    response = requests.delete(url, headers=headers)
+    if response.status_code == 204:
+        print(f"Successfully unfollowed {user_to_unfollow}")
+    else:
+        print(f"Failed to unfollow {user_to_unfollow}")
+
+# Kullanıcı profilini açma
+def open_profile(username):
+    webbrowser.open(f"https://github.com/{username}")
+
 # GUI fonksiyonları
 def show_non_followers():
     non_followers = find_non_followers(GITHUB_USERNAME, GITHUB_TOKEN)
-    non_followers_list.delete(0, tk.END)
-    for user in non_followers:
-        non_followers_list.insert(tk.END, user)
-
-def open_profile(event):
-    selection = non_followers_list.curselection()
-    if selection:
-        username = non_followers_list.get(selection[0])
-        webbrowser.open(f"https://github.com/{username}")
+    for widget in results_frame.winfo_children():
+        widget.destroy()  # Önceki sonuçları temizle
+    for i, user in enumerate(non_followers):
+        # Kullanıcı adı label'ı
+        user_label = tk.Label(results_frame, text=user, fg="blue", cursor="hand2")
+        user_label.grid(row=i, column=0, sticky=tk.W)
+        user_label.bind("<Button-1>", lambda e, u=user: open_profile(u))  # Tıklama olayını bağla
+        # Unfollow butonu
+        ttk.Button(results_frame, text="Unfollow",
+                   command=lambda u=user: unfollow_user(GITHUB_USERNAME, GITHUB_TOKEN, u)).grid(row=i, column=1)
 
 # Tkinter GUI oluşturma
 root = tk.Tk()
@@ -51,7 +68,7 @@ root.title("GitHub Non-Followers Finder")
 frame = ttk.Frame(root, padding="10")
 frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
-# Kullanıcı adı ve API Token (şimdilik GUI'den kaldırıldı)
+# Kullanıcı adı ve API Token
 ttk.Label(frame, text="GitHub Kullanıcı Adı:").grid(row=0, column=0, sticky=tk.W)
 username_entry = ttk.Entry(frame, width=25)
 username_entry.grid(row=0, column=1, columnspan=2, sticky=(tk.W, tk.E))
@@ -66,8 +83,7 @@ token_entry.insert(0, GITHUB_TOKEN)  # Varsayılan olarak .env dosyasından
 ttk.Button(frame, text="Bul", command=show_non_followers).grid(row=2, column=1, columnspan=2, sticky=(tk.W, tk.E))
 
 # Sonuç Listesi
-non_followers_list = tk.Listbox(frame, height=10, width=50)
-non_followers_list.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E))
-non_followers_list.bind('<Double-1>', open_profile)  # Çift tıklama olayını bağla
+results_frame = ttk.Frame(frame)
+results_frame.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E))
 
 root.mainloop()
