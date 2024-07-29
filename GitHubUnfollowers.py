@@ -42,6 +42,11 @@ def unfollow_user(username, token, user_to_unfollow):
         print(f"Successfully unfollowed {user_to_unfollow}")
     else:
         print(f"Failed to unfollow {user_to_unfollow}")
+    return response.status_code == 204
+
+def unfollow_all_users(username, token, users):
+    for user in users:
+        unfollow_user(username, token, user)
 
 # Kullanıcı profilini açma
 def open_profile(username):
@@ -58,8 +63,19 @@ def show_non_followers():
         user_label.grid(row=i, column=0, sticky=tk.W)
         user_label.bind("<Button-1>", lambda e, u=user: open_profile(u))  # Tıklama olayını bağla
         # Unfollow butonu
-        ttk.Button(results_frame, text="Unfollow",
-                   command=lambda u=user: unfollow_user(GITHUB_USERNAME, GITHUB_TOKEN, u)).grid(row=i, column=1)
+        unfollow_button = ttk.Button(results_frame, text="Unfollow",
+                                     command=lambda u=user: unfollow_and_remove(u))
+        unfollow_button.grid(row=i, column=1)
+
+    # "Unfollow All" butonunu güncelle
+    if non_followers:
+        unfollow_all_button.grid(row=len(non_followers), column=0, columnspan=2, pady=10)
+    else:
+        unfollow_all_button.grid_remove()
+
+def unfollow_and_remove(user):
+    if unfollow_user(GITHUB_USERNAME, GITHUB_TOKEN, user):
+        show_non_followers()  # Listeden kullanıcıyı çıkar ve güncelle
 
 # Tkinter GUI oluşturma
 root = tk.Tk()
@@ -68,7 +84,7 @@ root.title("GitHub Non-Followers Finder")
 frame = ttk.Frame(root, padding="10")
 frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
-# Kullanıcı adı ve API Token
+# Kullanıcı adı ve API Token (şimdilik GUI'den kaldırıldı)
 ttk.Label(frame, text="GitHub Kullanıcı Adı:").grid(row=0, column=0, sticky=tk.W)
 username_entry = ttk.Entry(frame, width=25)
 username_entry.grid(row=0, column=1, columnspan=2, sticky=(tk.W, tk.E))
@@ -85,5 +101,10 @@ ttk.Button(frame, text="Bul", command=show_non_followers).grid(row=2, column=1, 
 # Sonuç Listesi
 results_frame = ttk.Frame(frame)
 results_frame.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E))
+
+# "Unfollow All" butonu
+unfollow_all_button = ttk.Button(frame, text="Unfollow All", command=lambda: unfollow_all_users(GITHUB_USERNAME, GITHUB_TOKEN, find_non_followers(GITHUB_USERNAME, GITHUB_TOKEN)))
+unfollow_all_button.grid(row=4, column=0, columnspan=3, pady=10)
+unfollow_all_button.grid_remove()  # Başlangıçta gizle
 
 root.mainloop()
