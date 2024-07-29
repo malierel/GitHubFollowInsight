@@ -1,5 +1,3 @@
-Aşağıda, projeniz için GitHub'da kullanılabilecek bir README dosyası örneği bulunmaktadır. Bu dosya, projenin amacını, kurulum ve kullanım talimatlarını, gereksinimleri ve katkıda bulunma rehberini içerir.
-
 ```markdown
 # GitHub Non-Followers Finder
 
